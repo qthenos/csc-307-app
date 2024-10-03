@@ -42,6 +42,36 @@ const findUserByName = (name) => {
     );
 };
 
+const findUserById = (id) =>
+    users["users_list"].find((user) => user["id"] === id);
+
+const addUser = (user) => {
+    users["users_list"].push(user);
+    return user;
+};
+
+const deleteUserByID = (id) => {
+    for (var i = 0; i < users["users_list"].length; i++){
+        if (users["users_list"][i].id === id) {
+            return users["users_list"].splice(i, 1);
+        }
+    }
+};
+
+const findUserByNameAndJob = (name, job) => {
+    var fits = []
+    for (var i = 0; i < users["users_list"].length; i++){
+        if (users["users_list"][i].name === name && users["users_list"][i].job === job) {
+            fits.push(users["users_list"][i])
+        }
+    }
+    return fits;
+}
+
+app.get("/", (req, res) => {
+    res.send("Hello World!");
+});
+
 app.get("/users", (req, res) => {
     const name = req.query.name;
     if (name != undefined) {
@@ -53,12 +83,41 @@ app.get("/users", (req, res) => {
     }
 });
 
-app.get("/users", (req, res) => {
-    res.send(users);
+app.get("/users/:id", (req, res) => {
+    const id = req.params["id"]; //or req.params.id
+    let result = findUserById(id);
+    if (result === undefined) {
+        res.status(404).send("Resource not found.");
+    } else {
+        res.send(result);
+    }
 });
 
-app.get("/", (req, res) => {
-    res.send("Hello World!");
+app.get("/users/:name/:job", (req, res) => {
+    const name = req.params.name;
+    const job = req.params.job;
+    let result = findUserByNameAndJob(name, job);
+    if (!result || result.length === 0) {
+        res.status(404).send("Resource not found.");
+    } else {
+        res.send(result);
+    }
+});
+
+app.delete("/users/:id", (req, res) => {
+    const id = req.params.id;
+    let result = deleteUserByID(id);
+    if (result === undefined) {
+        res.status(404).send("Resource not found.");
+    } else {
+        res.send(result);
+    }
+});
+
+app.post("/users", (req, res) => {
+    const userToAdd = req.body;
+    addUser(userToAdd);
+    res.send();
 });
 
 app.listen(port, () => {
