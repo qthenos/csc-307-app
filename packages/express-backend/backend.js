@@ -38,6 +38,24 @@ const users = {
     ]
 };
 
+const makeid = (length) => {
+    let result = '';
+    const characters = 'abcdefghijklmnopqrstuvwxyz';
+    const numbers = '1234567890'
+    const charactersLength = characters.length;
+    const numbersLength = numbers.length;
+    let counter = 0;
+    while (counter < length) {
+        if (counter < length / 2) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        } else {
+            result += numbers.charAt(Math.floor(Math.random() * numbersLength));
+        }
+        counter += 1;
+    }
+    return result;
+}
+
 const findUserByName = (name) => {
     return users["users_list"].filter(
         (user) => user["name"] === name
@@ -48,6 +66,7 @@ const findUserById = (id) =>
     users["users_list"].find((user) => user["id"] === id);
 
 const addUser = (user) => {
+    user['id'] = makeid(6);
     users["users_list"].push(user);
     return user;
 };
@@ -126,14 +145,15 @@ app.delete("/users/:id", (req, res) => {
     if (result === undefined) {
         res.status(404).send("Resource not found.");
     } else {
-        res.send(result);
+        res.status(204).send();
     }
 });
 
 app.post("/users", (req, res) => {
     const userToAdd = req.body;
-    addUser(userToAdd);
-    res.send();
+    addUser(userToAdd)
+    res.status(201).send(userToAdd);
+
 });
 
 app.listen(port, () => {
